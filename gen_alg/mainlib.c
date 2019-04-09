@@ -2,6 +2,13 @@
 // Created by kolya on 08.04.2019.
 //
 
+//TODO All functions from main.c + printer
+//TODO make one main.c file
+//TODO full comments and description
+//TODO optimization!!!
+//TODO qsort!!! https://stackoverflow.com/questions/8721189/how-to-sort-an-array-of-structs-in-c
+//TODO NEW RANDOM MECHANISM!!!
+
 #include "mainlib.h"
 #include "stdio.h"
 
@@ -16,7 +23,7 @@ long _get_microtime() {
 }
 
 ushort _get_random_ushort(const ushort floor, const ushort celling) {
-    sleep(1);
+    sleep(0.1);
     srand(_get_microtime());
     int seed = rand();
     srand(seed);
@@ -30,9 +37,10 @@ ushort _ushort_concat(const ushort *high, const ushort *low) {
 
 //Generate binary string from ushort (UP TO 256!!!)
 //TODO Make algorithm more flexible (for ushort)
-char* short2bin(ushort number) {
+//TODO Fix detecting type of var!
+char* short2bin(ushort number, const ushort type_of_interpretation) {
     char* binary_ushort;
-    if (number <= PHENOTYPE_MAX_VALUE) {
+    if ((number <= PHENOTYPE_MAX_VALUE) && (type_of_interpretation == PHENOTYPE)) {
         binary_ushort = malloc(PHENOTYPE_LENGTH + 1);
         strcpy(binary_ushort, "");
         for (ushort i = 0; i < PHENOTYPE_LENGTH; i++) {
@@ -40,7 +48,7 @@ char* short2bin(ushort number) {
             number <<= 1;
         }
     }
-    else if ((number > PHENOTYPE_MAX_VALUE) && (number < MEMBER_MAX_VALUE)) {
+    else if ((number < MEMBER_MAX_VALUE) && (type_of_interpretation == MEMBER)) {
         binary_ushort = malloc(MEMBER_LENGTH + 1);
         strcpy(binary_ushort, "");
         for (ushort i = 0; i < MEMBER_LENGTH; i++) {
@@ -63,13 +71,13 @@ void generate_phenotype(ushort phenotype[]) {
 //CHECK - SHOULD IT RECOUNT FITNESS? IF YES (LIKE FUNCTION "CROSSOVER"), THEN IT SHOULD RETURN ARRAY OF GMEMBERS!!!
 //I guess it should
 //TODO Add fitness function calculation
-void generate_member(Gmember* member, const ushort phenotype[]) {
+void generate_member(Gmember member[], const ushort phenotype[]) {
     for (ushort i = 0; i < NUMBER_OF_MEMBERS; i++) {
-        ushort i = _get_random_ushort(0, 1);
+        ushort l = _get_random_ushort(0, 1);
         ushort j = _get_random_ushort(2, 4);
-        member[i].value = _ushort_concat(&phenotype[i], &phenotype[j]);
-        printf("Now it's %d\n", member[i].value);
+        member[i].value = _ushort_concat(&phenotype[l], &phenotype[j]);
     }
+    count_fitness(member);
 }
 
 void _swap_gmembers(Gmember* a, Gmember* b) {
@@ -80,10 +88,11 @@ void _swap_gmembers(Gmember* a, Gmember* b) {
 
 ushort _get_bit_summ(ushort member_value) {
     ushort summ = 0;
-    for (ushort i; i < MEMBER_LENGTH; i++) {
-        (member_value & 0x80 )? summ++ : summ;
-        member_value <<= 1;
+    for (ushort i = 0; i < MEMBER_LENGTH; i++) {
+        (member_value & 1) ? summ++ : summ;
+        member_value >>= 1;
     }
+    return summ;
 }
 
 void count_fitness(Gmember member[]) {
@@ -93,7 +102,7 @@ void count_fitness(Gmember member[]) {
 }
 
 float _get_fitness_summ(const float fitness[]) {
-    float fitness_summ;
+    float fitness_summ = 0;
     for (ushort i = 0; i < NUMBER_OF_MEMBERS; i++) {
         fitness_summ += fitness[i];
     }
@@ -159,8 +168,3 @@ void do_mutation(Gmember member[], ushort results[]) {
     results[0] = chance;
     results[1] = mutation_bit;
 }
-
-//TODO All functions from main.c + printer
-//TODO make one main.c file
-//TODO full comments and description
-//TODO optimization!!!

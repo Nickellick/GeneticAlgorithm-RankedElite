@@ -1,5 +1,8 @@
 #include <stdio.h>
 
+#define PHENOTYPE 0
+#define MEMBER 1
+
 //#include "gen_alg/generate.h"
 #include "gen_alg/mainlib.h"
 #include "gen_alg/print.h"
@@ -8,8 +11,6 @@
 #include <string.h>
 
 #define ATTRIBUTE_LENGTH 5
-#define PHENOTYPE 1
-#define MEMBER 0
 #define MEMBER_COUNT 10
 
 //typedef unsigned short ushort;
@@ -140,16 +141,12 @@ int main()
     ushort phenotype[5];
     printf("Generating phenotypes...\n");
     generate_phenotype(phenotype);
-    for (ushort i = 0; i < 5; i++)
-    {
-        printf("%d\n", phenotype[i]);
-    }
     printf("Generate members...\n");
-    generate_member(&member[0], phenotype);
-    for (ushort i = 0; i < 10; i++)
-    {
-        printf("%d\n", member[i].value);
-    }
+    generate_member(member, phenotype);
+    print_member(member);
+    sort_members_by_fitness(member);
+    printf("Sorted members\n");
+    print_member(member);
 //    printf("Printing elements...\n");
 //    print_member(member);
 

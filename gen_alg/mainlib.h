@@ -60,7 +60,7 @@ typedef unsigned short ushort;
 
 //Defining "Gmember" type
 #ifndef _GMEMBER
-typedef struct {
+typedef struct gmember_struct {
     ushort value;
     float fitness;
 } Gmember;
@@ -72,7 +72,7 @@ typedef struct {
 long get_microtime();
 ushort _get_random_ushort(const ushort floor, const ushort celling);
 ushort _ushort_concat(const ushort *high, const ushort *low);
-char* short2bin(ushort number);
+char* short2bin(ushort number, const ushort type_of_interpretation);
 void generate_phenotype(ushort phenotype[]);
 void generate_member(Gmember* member, const ushort phenotype[]);
 void _swap_gmembers(Gmember* a, Gmember* b);
