@@ -44,7 +44,7 @@ char* short2bin(ushort number, const ushort type_of_interpretation) {
         binary_ushort = malloc(PHENOTYPE_LENGTH + 1);
         strcpy(binary_ushort, "");
         for (ushort i = 0; i < PHENOTYPE_LENGTH; i++) {
-            (number & 0x08) ? strcat(binary_ushort, "1") : strcat(binary_ushort, "0");
+            number & 0x08 ? strcat(binary_ushort, "1") : strcat(binary_ushort, "0");
             number <<= 1;
         }
     }
