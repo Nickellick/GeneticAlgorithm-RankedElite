@@ -47,6 +47,10 @@
 #define NUMBER_OF_MEMBERS 10
 #endif //NUMBER_OF_MEMBERS
 
+#if NUMBER_OF_MEMBERS % 2 != 0
+#error "'NUMBER_OF_MEMBERS' should be odd!"
+#endif
+
 //Defining "ushort" type
 #ifndef _USHORT
 typedef unsigned short ushort;

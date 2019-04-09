@@ -59,31 +59,32 @@ void generate_phenotype(ushort phenotype[]) {
 
 
 //TODO More flexible too plz
-void generate_member(ushort member[], const ushort phenotype[]) {
+//CHECK - SHOULD IT RECOUNT FITNESS? IF YES (LIKE FUNCTION "CROSSOVER"), THEN IT SHOULD RETURN ARRAY OF GMEMBERS!!!
+void generate_member(ushort member_value[], const ushort phenotype[]) {
     for (ushort i = 0; i < NUMBER_OF_MEMBERS; i++) {
         ushort i = _get_random_ushort(0, 1);
         ushort j = _get_random_ushort(2, 4);
-        member[i] = _ushort_concat(&phenotype[i], &phenotype[j]);
+        member_value[i] = _ushort_concat(&phenotype[i], &phenotype[j]);
     }
 }
 
-void _swap(ushort* a, ushort* b) {
-    ushort temp = *a;
+void _swap_gmembers(Gmember* a, Gmember* b) {
+    Gmember temp = *a;
     *a = *b;
     *b = temp;
 }
 
-ushort _bit_summ(ushort member) {
+ushort _get_bit_summ(ushort member_value) {
     ushort summ = 0;
     for (ushort i; i < MEMBER_LENGTH; i++) {
-        (member & 0x80 )? summ++ : NULL;
-        member <<= 1;
+        (member_value & 0x80 )? summ++ : NULL;
+        member_value <<= 1;
     }
 }
 
 void count_fitness(Gmember member[]) {
     for (ushort i = 0; i < NUMBER_OF_MEMBERS; i++) {
-        member[i].fitness = (float)_bit_summ(member[i].value)/NUMBER_OF_MEMBERS;
+        member[i].fitness = (float)_get_bit_summ(member[i].value)/NUMBER_OF_MEMBERS;
     }
 }
 
@@ -95,9 +96,67 @@ float _get_fitness_summ(const float fitness[]) {
     return fitness_summ;
 }
 
+void sort_members_by_fitness(Gmember member[]) {
+    for (ushort i = 0; i < NUMBER_OF_MEMBERS; i++) {
+        for (ushort j = 0; j < NUMBER_OF_MEMBERS - i - 1; j++) {
+            if(member[j].fitness > member[i].fitness) {
+                _swap_gmembers(&member[j], &member[j+1]);
+            }
+        }
+    }
+}
+
+//IS IT OPTIMISED???
+float get_fitness_variation(Gmember member[]) {
+    Gmember fit_cpy[NUMBER_OF_MEMBERS];
+    for (ushort i = 0; i < NUMBER_OF_MEMBERS; i++) {
+        fit_cpy[i].fitness = member[i].fitness;
+    }
+    sort_members_by_fitness(fit_cpy);
+    return fit_cpy[NUMBER_OF_MEMBERS - 1].fitness - fit_cpy[0].fitness;
+}
+
 //TODO Make it more flexible too
-void do_crossover();
+//THIS FUNCTION RECOUNTS FITNESS!!!
+ushort do_crossover(Gmember member[]) {
+    ushort crossover_point = _get_random_ushort(0, 6);
+    Gmember temp_member[NUMBER_OF_MEMBERS];
+    for (ushort i = 0; i < NUMBER_OF_MEMBERS / 2; i++) {
+        ushort temp_member1R = member[i].value;
+        ushort temp_member2R = member[i + NUMBER_OF_MEMBERS / 2].value;
+        ushort temp_member1L = member[i].value;
+        ushort temp_member2L = member[i + NUMBER_OF_MEMBERS / 2].value;
+        temp_member1R &= ~(0xFFFF << crossover_point);
+        temp_member2R &= ~(0xFFFF << crossover_point);
+        temp_member1L &= (0xFFFF << crossover_point);
+        temp_member2L &= (0xFFFF << crossover_point);
+        temp_member[i].value = temp_member1L + temp_member2R;
+        temp_member[i + NUMBER_OF_MEMBERS / 2] = temp_member2L + temp_member1R;
+    }
+    memccpy(member, temp_member, sizeof(temp_member));
+    count_fitness(member);
+    return crossover_point;
+}
+
+//THIS FUNCTION RECOUNTS FITNESS TOO!!!
+//returns chance in percent (ushort) and mutation bit as array of 2 ushort values
+ushort* do_mutation(Gmember member[]) {
+    ushort chance = _get_random_ushort(0, 100);
+    ushort mutation_bit = _get_random_ushort(0, 7);
+    for (ushort i = 0; i < NUMBER_OF_MEMBERS; i++) {
+        ushort temp_chance = _get_random_ushort(0, 100);
+        if (temp_chance <= chance) {
+            ushort mutation_mask = 1 << mutation_bit;
+            member[i].value & mutation_mask ? (member[i].value &= ~(1 << mutation_bit)) :\
+            (member[i].value |= (1 << mutation_bit));
+        }
+    }
+    count_fitness(member);
+    ushort results[2] = {chance, mutation_bit};
+    return results;
+}
 
 //TODO All functions from main.c + printer
 //TODO make one main.c file
 //TODO full comments and description
+//TODO optimization!!!
