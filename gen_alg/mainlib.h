@@ -70,6 +70,18 @@ typedef struct {
 
 
 long get_microtime();
+ushort _get_random_ushort(const ushort floor, const ushort celling);
 ushort _ushort_concat(const ushort *high, const ushort *low);
 char* short2bin(ushort number);
+void generate_phenotype(ushort phenotype[]);
+void generate_member(Gmember* member, const ushort phenotype[]);
+void _swap_gmembers(Gmember* a, Gmember* b);
+ushort _get_bit_summ(ushort member_value);
+void count_fitness(Gmember member[]);
+float _get_fitness_summ(const float fitness[]);
+void sort_members_by_fitness(Gmember member[]);
+float get_fitness_variation(Gmember member[]);
+ushort do_crossover(Gmember member[]);
+void do_mutation(Gmember member[], ushort results[]);
+
 #endif //GENETICALGORITHM_RANKEDELITE_MAINLIB_H

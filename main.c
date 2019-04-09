@@ -2,6 +2,7 @@
 
 //#include "gen_alg/generate.h"
 #include "gen_alg/mainlib.h"
+#include "gen_alg/print.h"
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -135,11 +136,23 @@
 
 int main()
 {
-    printf("Enter number to output: ");
-    ushort a;
-    scanf("%d", &a);
-    char* answ = short2bin(a);
-    printf("\nAnswer is: %s\n%d", answ, (1<<4)-1);
+    Gmember member[10];
+    ushort phenotype[5];
+    printf("Generating phenotypes...\n");
+    generate_phenotype(phenotype);
+    for (ushort i = 0; i < 5; i++)
+    {
+        printf("%d\n", phenotype[i]);
+    }
+    printf("Generate members...\n");
+    generate_member(&member[0], phenotype);
+    for (ushort i = 0; i < 10; i++)
+    {
+        printf("%d\n", member[i].value);
+    }
+//    printf("Printing elements...\n");
+//    print_member(member);
+
 //    unsigned short phenotype[5];
 //    unsigned short Gmember[MEMBER_COUNT];
 //    printf("Step 1. Generating phenotype...\n");

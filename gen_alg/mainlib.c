@@ -3,6 +3,7 @@
 //
 
 #include "mainlib.h"
+#include "stdio.h"
 
 #define PHENOTYPE_MAX_VALUE ((1 << PHENOTYPE_LENGTH) - 1)
 #define MEMBER_MAX_VALUE ((1 << MEMBER_LENGTH) - 1)
@@ -15,21 +16,21 @@ long _get_microtime() {
 }
 
 ushort _get_random_ushort(const ushort floor, const ushort celling) {
-    sleep(0.07);
-    srand(get_microtime());
+    sleep(1);
+    srand(_get_microtime());
     int seed = rand();
     srand(seed);
     return floor + (rand() % (celling - floor + 1));
 }
 
 //Concatinate two 'short' to get one Gmember in generation
-ushort _ushort_concat(const ushort *high, const ushort *low){
+ushort _ushort_concat(const ushort *high, const ushort *low) {
     return (*high << 4) + *low;
 }
 
 //Generate binary string from ushort (UP TO 256!!!)
 //TODO Make algorithm more flexible (for ushort)
-char* short2bin(ushort number){
+char* short2bin(ushort number) {
     char* binary_ushort;
     if (number <= PHENOTYPE_MAX_VALUE) {
         binary_ushort = malloc(PHENOTYPE_LENGTH + 1);
@@ -53,18 +54,21 @@ char* short2bin(ushort number){
 
 void generate_phenotype(ushort phenotype[]) {
     for (ushort i = 0; i < NUMBER_OF_PHENOTYPES; i++) {
-        phenotype[i] = _get_random_ushort(0, PHENOTYPE_MAX_VALUE;
+        phenotype[i] = _get_random_ushort(0, PHENOTYPE_MAX_VALUE);
     }
 }
 
 
 //TODO More flexible too plz
 //CHECK - SHOULD IT RECOUNT FITNESS? IF YES (LIKE FUNCTION "CROSSOVER"), THEN IT SHOULD RETURN ARRAY OF GMEMBERS!!!
-void generate_member(ushort member_value[], const ushort phenotype[]) {
+//I guess it should
+//TODO Add fitness function calculation
+void generate_member(Gmember* member, const ushort phenotype[]) {
     for (ushort i = 0; i < NUMBER_OF_MEMBERS; i++) {
         ushort i = _get_random_ushort(0, 1);
         ushort j = _get_random_ushort(2, 4);
-        member_value[i] = _ushort_concat(&phenotype[i], &phenotype[j]);
+        member[i].value = _ushort_concat(&phenotype[i], &phenotype[j]);
+        printf("Now it's %d\n", member[i].value);
     }
 }
 
@@ -77,7 +81,7 @@ void _swap_gmembers(Gmember* a, Gmember* b) {
 ushort _get_bit_summ(ushort member_value) {
     ushort summ = 0;
     for (ushort i; i < MEMBER_LENGTH; i++) {
-        (member_value & 0x80 )? summ++ : NULL;
+        (member_value & 0x80 )? summ++ : summ;
         member_value <<= 1;
     }
 }
@@ -131,16 +135,16 @@ ushort do_crossover(Gmember member[]) {
         temp_member1L &= (0xFFFF << crossover_point);
         temp_member2L &= (0xFFFF << crossover_point);
         temp_member[i].value = temp_member1L + temp_member2R;
-        temp_member[i + NUMBER_OF_MEMBERS / 2] = temp_member2L + temp_member1R;
+        temp_member[i + NUMBER_OF_MEMBERS / 2].value = temp_member2L + temp_member1R;
     }
-    memccpy(member, temp_member, sizeof(temp_member));
+    memcpy(member, temp_member, sizeof(temp_member));
     count_fitness(member);
     return crossover_point;
 }
 
 //THIS FUNCTION RECOUNTS FITNESS TOO!!!
 //returns chance in percent (ushort) and mutation bit as array of 2 ushort values
-ushort* do_mutation(Gmember member[]) {
+void do_mutation(Gmember member[], ushort results[]) {
     ushort chance = _get_random_ushort(0, 100);
     ushort mutation_bit = _get_random_ushort(0, 7);
     for (ushort i = 0; i < NUMBER_OF_MEMBERS; i++) {
@@ -152,8 +156,8 @@ ushort* do_mutation(Gmember member[]) {
         }
     }
     count_fitness(member);
-    ushort results[2] = {chance, mutation_bit};
-    return results;
+    results[0] = chance;
+    results[1] = mutation_bit;
 }
 
 //TODO All functions from main.c + printer
